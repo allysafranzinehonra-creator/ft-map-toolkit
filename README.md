@@ -1,51 +1,88 @@
-# FT Map Toolkit
+# 🗺️ Flourish Map Toolkit
 
-A browser-based toolkit for preparing map data for Flourish and FT-style mapping workflows.
+A collection of lightweight, browser-based utilities designed to speed
+up common workflows when preparing data for **Flourish** maps.
 
-## Included tools
+![HTML](https://img.shields.io/badge/HTML-5-E34F26?logo=html5&logoColor=white)
+![JavaScript](https://img.shields.io/badge/JavaScript-ES6-F7DF1E?logo=javascript&logoColor=black)
+![Offline](https://img.shields.io/badge/Works-Offline-success)
+![License](https://img.shields.io/badge/License-Personal-blue)
 
-### Earthquake Heatmap Converter
-Converts USGS MMI contour GeoJSON into:
+------------------------------------------------------------------------
 
-- `flourish_regions.csv` for the FT WebGL Map **Regions** sheet
-- `banded_regions.geojson`
+## ✨ Features
 
-The converter groups contours into five intensity bands and allows basic opacity and stroke settings.
+-   ✅ Runs entirely in your browser
+-   ✅ No installation required
+-   ✅ No data uploaded to external servers
+-   ✅ Designed for Flourish mapping workflows
+-   ✅ One-click CSV exports
 
-### Flourish Coordinates Converter
-Converts WKT point values such as:
+------------------------------------------------------------------------
 
-```text
-POINT (118.9 13.7)
-```
+## 🛠️ Included Tools
 
-into separate:
+### 🌍 Earthquake Heatmap Converter
 
-- `latitude`
-- `longitude`
+Convert USGS `cont_mmi.json` files into the **FT WebGL Map -- Regions**
+format.
 
-columns and exports a cleaned CSV for Flourish.
+**Features** - Converts MMI contour polygons into FT WebGL regions -
+Groups contours into five intensity bands - Exports: -
+`flourish_regions.csv` - `banded_regions.geojson`
 
-## How to use
+------------------------------------------------------------------------
 
-1. Open the live GitHub Pages link, or download `index.html` and open it in a browser.
-2. Select the required converter tab.
-3. Upload or drag and drop your source file.
-4. Adjust the available settings.
-5. Preview and download the converted output.
+### 📍 Flourish Coordinates Converter
 
-All processing happens locally in the browser. Files are not uploaded to a server.
+Convert WKT coordinates (e.g. `POINT (118.9 13.7)`) into separate
+latitude and longitude columns.
 
-## Run locally
+**Features** - Automatically detects the WKT column - Splits latitude
+and longitude - Optional removal of the original WKT column - Preview
+before download - Exports a Flourish-ready CSV
 
-Download the repository and open `index.html` in Chrome, Edge, Firefox, or Safari.
+------------------------------------------------------------------------
 
-## Publish with GitHub Pages
+## 🚀 Planned Tools
 
-1. Open the repository on GitHub.
-2. Go to **Settings** → **Pages**.
-3. Under **Build and deployment**, choose **Deploy from a branch**.
-4. Select the `main` branch and `/ (root)` folder.
-5. Click **Save**.
+-   GeoJSON Cleaner
+-   KMZ/KML → GeoJSON Converter
+-   GPX → GeoJSON Converter
+-   Location Finder
+-   Map Bounds Calculator
 
-GitHub will generate a public website link after deployment.
+------------------------------------------------------------------------
+
+## 📸 Screenshots
+
+> Add screenshots here as the toolkit grows.
+
+    Earthquake Heatmap Converter
+    ┌─────────────────────────────────────────────┐
+    │ Upload cont_mmi.json                        │
+    │ Configure bands                             │
+    │ Download Flourish CSV / GeoJSON             │
+    └─────────────────────────────────────────────┘
+
+    Flourish Coordinates Converter
+    ┌─────────────────────────────────────────────┐
+    │ Upload CSV                                 │
+    │ Split WKT → Latitude / Longitude           │
+    │ Preview                                    │
+    │ Download CSV                               │
+    └─────────────────────────────────────────────┘
+
+------------------------------------------------------------------------
+
+## 💻 Technology
+
+-   HTML5
+-   CSS3
+-   Vanilla JavaScript
+
+------------------------------------------------------------------------
+
+## 📄 License
+
+Personal project for map production workflows.
