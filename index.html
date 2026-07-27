@@ -1,752 +1,182 @@
-<!DOCTYPE html>
-<html><head><meta charset="utf-8">
-<title>FT Map Toolkit</title>
-<style>
-body{margin:0;font-family:Arial,sans-serif;background:#fff1e5}
-header{padding:16px 24px;background:#0f5499;color:#fff}
-.tabs{display:flex;background:#eee;border-bottom:1px solid #ccc}
-button{padding:12px 18px;border:0;background:#eee;cursor:pointer;font-weight:bold}
-button.active{background:#fff;border-bottom:3px solid #0f5499}
-iframe{width:100%;height:calc(100vh - 105px);border:0;display:none}
-iframe.active{display:block}
-</style></head>
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="Browser-based utilities for preparing data for Flourish maps.">
+  <title>Flourish Map Toolkit</title>
+  <link rel="stylesheet" href="style.css">
+</head>
 <body>
-<header><h2 style="margin:0">FT Map Toolkit</h2></header>
-<div class="tabs">
-<button class="active" onclick="show(0,this)">Earthquake Heatmap Converter</button>
-<button onclick="show(1,this)">Flourish Coordinates Converter</button>
-</div>
-<iframe class="active" srcdoc='&lt;!doctype html&gt;
-&lt;html lang=&quot;en&quot;&gt;
-&lt;head&gt;
-&lt;meta charset=&quot;utf-8&quot; /&gt;
-&lt;meta name=&quot;viewport&quot; content=&quot;width=device-width,initial-scale=1&quot; /&gt;
-&lt;title&gt;USGS MMI contours to FT WebGL regions&lt;/title&gt;
-&lt;style&gt;
-  :root{font-family:Arial,Helvetica,sans-serif;color:#222;background:#fff1e5}body{max-width:980px;margin:32px auto;padding:0 20px}h1{font-size:28px;margin-bottom:8px}.card{background:#fff;border:1px solid #d7cec7;border-radius:8px;padding:18px;margin:16px 0}.drop{border:2px dashed #999;padding:30px;text-align:center;border-radius:8px;background:#fafafa}.drop.drag{background:#f2dfce;border-color:#333}button{background:#0f5499;color:#fff;border:0;border-radius:4px;padding:10px 14px;font-weight:bold;cursor:pointer}button:disabled{opacity:.4;cursor:not-allowed}code,pre{background:#f6f6f6;padding:2px 5px;border-radius:3px}.grid{display:grid;grid-template-columns:repeat(5,1fr);gap:8px;margin-top:10px}.swatch{height:28px;border-radius:3px;border:1px solid rgba(0,0,0,.15)}label{display:block;margin:10px 0 4px;font-weight:bold}input{padding:7px;border:1px solid #bbb;border-radius:4px;width:120px}.small{font-size:13px;color:#666}.row{display:flex;gap:14px;flex-wrap:wrap;align-items:end}.status{white-space:pre-wrap;font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:13px}&lt;/style&gt;
-&lt;/head&gt;
-&lt;body&gt;
-&lt;h1&gt;USGS MMI contours → FT WebGL 5-band regions&lt;/h1&gt;
-&lt;p&gt;This runs fully in your browser. Drop a USGS &lt;code&gt;cont_mmi.json&lt;/code&gt; file and it will create a &lt;code&gt;flourish_regions.csv&lt;/code&gt; for the FT WebGL Map &lt;strong&gt;Regions&lt;/strong&gt; sheet.&lt;/p&gt;
-
-&lt;div class=&quot;card&quot;&gt;
-  &lt;div id=&quot;drop&quot; class=&quot;drop&quot;&gt;
-    &lt;p&gt;&lt;strong&gt;Drop cont_mmi.json here&lt;/strong&gt;&lt;/p&gt;
-    &lt;p class=&quot;small&quot;&gt;or choose a file&lt;/p&gt;
-    &lt;input id=&quot;file&quot; type=&quot;file&quot; accept=&quot;.json,.geojson,application/json&quot; /&gt;
-  &lt;/div&gt;
-&lt;/div&gt;
-
-&lt;div class=&quot;card&quot;&gt;
-  &lt;h2&gt;Band settings&lt;/h2&gt;
-  &lt;p class=&quot;small&quot;&gt;These are grouped to match the simple FT-style legend: Less → More.&lt;/p&gt;
-  &lt;div class=&quot;grid&quot;&gt;
-    &lt;div&gt;&lt;div class=&quot;swatch&quot; style=&quot;background:#f8de8b&quot;&gt;&lt;/div&gt;&lt;div class=&quot;small&quot;&gt;3–4&lt;/div&gt;&lt;/div&gt;
-    &lt;div&gt;&lt;div class=&quot;swatch&quot; style=&quot;background:#f8ae4c&quot;&gt;&lt;/div&gt;&lt;div class=&quot;small&quot;&gt;4.5–5.5&lt;/div&gt;&lt;/div&gt;
-    &lt;div&gt;&lt;div class=&quot;swatch&quot; style=&quot;background:#f96a2c&quot;&gt;&lt;/div&gt;&lt;div class=&quot;small&quot;&gt;6–7&lt;/div&gt;&lt;/div&gt;
-    &lt;div&gt;&lt;div class=&quot;swatch&quot; style=&quot;background:#e83b26&quot;&gt;&lt;/div&gt;&lt;div class=&quot;small&quot;&gt;7.5–8&lt;/div&gt;&lt;/div&gt;
-    &lt;div&gt;&lt;div class=&quot;swatch&quot; style=&quot;background:#c7221f&quot;&gt;&lt;/div&gt;&lt;div class=&quot;small&quot;&gt;8.5+&lt;/div&gt;&lt;/div&gt;
-  &lt;/div&gt;
-  &lt;div class=&quot;row&quot;&gt;
-    &lt;div&gt;&lt;label&gt;Base opacity&lt;/label&gt;&lt;input id=&quot;opacity&quot; type=&quot;number&quot; min=&quot;0&quot; max=&quot;1&quot; step=&quot;0.05&quot; value=&quot;0.62&quot;&gt;&lt;/div&gt;
-    &lt;div&gt;&lt;label&gt;Stroke colour&lt;/label&gt;&lt;input id=&quot;stroke&quot; type=&quot;text&quot; value=&quot;&quot;&gt;&lt;/div&gt;
-    &lt;div&gt;&lt;label&gt;Stroke width&lt;/label&gt;&lt;input id=&quot;strokeWidth&quot; type=&quot;number&quot; min=&quot;0&quot; step=&quot;0.1&quot; value=&quot;0&quot;&gt;&lt;/div&gt;
-  &lt;/div&gt;
-&lt;/div&gt;
-
-&lt;div class=&quot;card&quot;&gt;
-  &lt;button id=&quot;download&quot; disabled&gt;Download flourish_regions.csv&lt;/button&gt;
-  &lt;button id=&quot;downloadGeo&quot; disabled&gt;Download banded_regions.geojson&lt;/button&gt;
-  &lt;p id=&quot;status&quot; class=&quot;status&quot;&gt;Waiting for file...&lt;/p&gt;
-&lt;/div&gt;
-
-&lt;div class=&quot;card small&quot;&gt;
-  &lt;h2&gt;How to use in Flourish&lt;/h2&gt;
-  &lt;p&gt;Open the FT WebGL Map → Data → &lt;strong&gt;Regions&lt;/strong&gt;. Delete the sample region rows, then import or paste the CSV. The &lt;code&gt;region_geometry&lt;/code&gt; cells contain full GeoJSON FeatureCollections, one row per intensity band.&lt;/p&gt;
-&lt;/div&gt;
-
-&lt;script&gt;
-const bands = [
-  {label:&#x27;shake-intensity-1&#x27;, min:3, max:4, color:&#x27;#f8de8b&#x27;, opacity:0.42},
-  {label:&#x27;shake-intensity-2&#x27;, min:4.5, max:5.5, color:&#x27;#f8ae4c&#x27;, opacity:0.50},
-  {label:&#x27;shake-intensity-3&#x27;, min:6, max:7, color:&#x27;#f96a2c&#x27;, opacity:0.58},
-  {label:&#x27;shake-intensity-4&#x27;, min:7.5, max:8, color:&#x27;#e83b26&#x27;, opacity:0.66},
-  {label:&#x27;shake-intensity-5&#x27;, min:8.5, max:99, color:&#x27;#c7221f&#x27;, opacity:0.74}
-];
-let csvBlob = null, geoBlob = null;
-const $ = id =&gt; document.getElementById(id);
-
-function isClosed(ring){
-  if(!Array.isArray(ring) || ring.length &lt; 4) return false;
-  const a = ring[0], b = ring[ring.length-1];
-  return Math.abs(a[0]-b[0]) &lt; 1e-6 &amp;&amp; Math.abs(a[1]-b[1]) &lt; 1e-6;
-}
-function closeRing(ring){
-  if(!ring || ring.length &lt; 3) return null;
-  const out = ring.map(p =&gt; [Number(p[0]), Number(p[1])]).filter(p =&gt; isFinite(p[0]) &amp;&amp; isFinite(p[1]));
-  if(out.length &lt; 3) return null;
-  const a = out[0], b = out[out.length-1];
-  if(Math.abs(a[0]-b[0]) &gt; 1e-6 || Math.abs(a[1]-b[1]) &gt; 1e-6) out.push([a[0], a[1]]);
-  return out.length &gt;= 4 ? out : null;
-}
-function signedArea(ring){
-  let sum = 0;
-  for(let i=0;i&lt;ring.length-1;i++) sum += ring[i][0]*ring[i+1][1] - ring[i+1][0]*ring[i][1];
-  return sum/2;
-}
-function normaliseRing(ring){
-  const area = signedArea(ring);
-  return area &lt; 0 ? ring.slice().reverse() : ring;
-}
-function bandForValue(v){ return bands.find(b =&gt; v &gt;= b.min &amp;&amp; v &lt;= b.max); }
-function featureToPolygonFeatures(feature){
-  const geom = feature.geometry || {};
-  const value = Number(feature.properties &amp;&amp; feature.properties.value);
-  const band = bandForValue(value);
-  if(!band) return [];
-  let rings = [];
-  if(geom.type === &#x27;LineString&#x27;) rings = [geom.coordinates];
-  if(geom.type === &#x27;MultiLineString&#x27;) rings = geom.coordinates || [];
-  if(geom.type === &#x27;Polygon&#x27;) rings = (geom.coordinates || []).slice(0,1);
-  if(geom.type === &#x27;MultiPolygon&#x27;) rings = (geom.coordinates || []).map(poly =&gt; poly[0]);
-  return rings.map(closeRing).filter(Boolean).map(ring =&gt; ({
-    type:&#x27;Feature&#x27;,
-    properties:{ value, band:band.label, band_min:band.min, band_max:band.max },
-    geometry:{ type:&#x27;Polygon&#x27;, coordinates:[normaliseRing(ring)] }
-  }));
-}
-function csvEscape(v){
-  const s = String(v == null ? &#x27;&#x27; : v);
-  return /[&quot;,\n\r]/.test(s) ? &#x27;&quot;&#x27; + s.replace(/&quot;/g,&#x27;&quot;&quot;&#x27;) + &#x27;&quot;&#x27; : s;
-}
-function makeCsv(rows){
-  const headers = [&#x27;region_geometry&#x27;,&#x27;region_label&#x27;,&#x27;region_fill&#x27;,&#x27;region_fill_opacity&#x27;,&#x27;region_stroke&#x27;,&#x27;region_stroke_width&#x27;,&#x27;region_stroke_dash_array&#x27;,&#x27;region_stroke_linecap&#x27;,&#x27;region_line_opacity&#x27;,&#x27;region_line_blur&#x27;,&#x27;visible&#x27;];
-  return [headers.join(&#x27;,&#x27;), ...rows.map(r =&gt; headers.map(h =&gt; csvEscape(r[h] ?? &#x27;&#x27;)).join(&#x27;,&#x27;))].join(&#x27;\n&#x27;);
-}
-async function handleFile(file){
-  try{
-    const text = await file.text();
-    const gj = JSON.parse(text);
-    const features = gj.features || [];
-    const polygons = features.flatMap(featureToPolygonFeatures);
-    const byBand = new Map(bands.map(b =&gt; [b.label, []]));
-    polygons.forEach(f =&gt; byBand.get(f.properties.band).push(f));
-    const baseOpacity = Number($(&#x27;opacity&#x27;).value) || 0.62;
-    const stroke = $(&#x27;stroke&#x27;).value.trim();
-    const strokeWidth = $(&#x27;strokeWidth&#x27;).value;
-    const rows = bands.map((b, i) =&gt; {
-      const fc = { type:&#x27;FeatureCollection&#x27;, features: byBand.get(b.label) };
-      const scaledOpacity = Math.min(1, +(baseOpacity * (0.68 + i*0.12)).toFixed(2));
-      return {
-        region_geometry: JSON.stringify(fc),
-        region_label: b.label,
-        region_fill: b.color,
-        region_fill_opacity: scaledOpacity,
-        region_stroke: stroke,
-        region_stroke_width: strokeWidth || &#x27;&#x27;,
-        visible: &#x27;TRUE&#x27;
-      };
-    }).filter(r =&gt; JSON.parse(r.region_geometry).features.length &gt; 0);
-    const allFc = {type:&#x27;FeatureCollection&#x27;, features: polygons};
-    csvBlob = new Blob([makeCsv(rows)], {type:&#x27;text/csv;charset=utf-8&#x27;});
-    geoBlob = new Blob([JSON.stringify(allFc)], {type:&#x27;application/geo+json;charset=utf-8&#x27;});
-    $(&#x27;download&#x27;).disabled = rows.length === 0;
-    $(&#x27;downloadGeo&#x27;).disabled = polygons.length === 0;
-    const counts = rows.map(r =&gt; `${r.region_label}: ${JSON.parse(r.region_geometry).features.length}`).join(&#x27;\n&#x27;);
-    $(&#x27;status&#x27;).textContent = `Converted ${polygons.length} closed contour rings into ${rows.length} FT WebGL region rows.\n\n${counts}\n\nSkipped open contour segments automatically.`;
-  }catch(e){
-    $(&#x27;status&#x27;).textContent = &#x27;Error: &#x27; + e.message;
-    $(&#x27;download&#x27;).disabled = true; $(&#x27;downloadGeo&#x27;).disabled = true;
-  }
-}
-function downloadBlob(blob, name){
-  const a = document.createElement(&#x27;a&#x27;);
-  a.href = URL.createObjectURL(blob); a.download = name; document.body.appendChild(a); a.click(); a.remove();
-  setTimeout(()=&gt;URL.revokeObjectURL(a.href), 500);
-}
-$(&#x27;file&#x27;).addEventListener(&#x27;change&#x27;, e =&gt; e.target.files[0] &amp;&amp; handleFile(e.target.files[0]));
-$(&#x27;download&#x27;).addEventListener(&#x27;click&#x27;, () =&gt; csvBlob &amp;&amp; downloadBlob(csvBlob, &#x27;flourish_regions.csv&#x27;));
-$(&#x27;downloadGeo&#x27;).addEventListener(&#x27;click&#x27;, () =&gt; geoBlob &amp;&amp; downloadBlob(geoBlob, &#x27;banded_regions.geojson&#x27;));
-[&#x27;dragenter&#x27;,&#x27;dragover&#x27;].forEach(ev =&gt; $(&#x27;drop&#x27;).addEventListener(ev, e =&gt; {e.preventDefault(); $(&#x27;drop&#x27;).classList.add(&#x27;drag&#x27;);}));
-[&#x27;dragleave&#x27;,&#x27;drop&#x27;].forEach(ev =&gt; $(&#x27;drop&#x27;).addEventListener(ev, e =&gt; {e.preventDefault(); $(&#x27;drop&#x27;).classList.remove(&#x27;drag&#x27;);}));
-$(&#x27;drop&#x27;).addEventListener(&#x27;drop&#x27;, e =&gt; e.dataTransfer.files[0] &amp;&amp; handleFile(e.dataTransfer.files[0]));
-&lt;/script&gt;
-&lt;/body&gt;
-&lt;/html&gt;
-'></iframe>
-<iframe srcdoc='&lt;!DOCTYPE html&gt;
-&lt;html lang=&quot;en&quot;&gt;
-&lt;head&gt;
-  &lt;meta charset=&quot;UTF-8&quot; /&gt;
-  &lt;meta name=&quot;viewport&quot; content=&quot;width=device-width, initial-scale=1.0&quot; /&gt;
-  &lt;title&gt;WKT Coordinate Converter&lt;/title&gt;
-  &lt;style&gt;
-    :root {
-      --bg: #f4f6f8;
-      --card: #ffffff;
-      --text: #17202a;
-      --muted: #667085;
-      --border: #d0d5dd;
-      --accent: #111827;
-      --accent-hover: #344054;
-      --success-bg: #ecfdf3;
-      --success-text: #027a48;
-      --error-bg: #fef3f2;
-      --error-text: #b42318;
-    }
-
-    * { box-sizing: border-box; }
-
-    body {
-      margin: 0;
-      font-family: Arial, Helvetica, sans-serif;
-      background: var(--bg);
-      color: var(--text);
-    }
-
-    .wrap {
-      max-width: 1100px;
-      margin: 0 auto;
-      padding: 36px 20px 56px;
-    }
-
-    h1 {
-      margin: 0 0 8px;
-      font-size: clamp(28px, 5vw, 42px);
-      line-height: 1.1;
-    }
-
-    .intro {
-      margin: 0 0 26px;
-      color: var(--muted);
-      line-height: 1.55;
-      max-width: 760px;
-    }
-
-    .card {
-      background: var(--card);
-      border: 1px solid var(--border);
-      border-radius: 16px;
-      padding: 22px;
-      box-shadow: 0 8px 24px rgba(16, 24, 40, 0.06);
-    }
-
-    .dropzone {
-      display: block;
-      border: 2px dashed var(--border);
-      border-radius: 14px;
-      padding: 34px 20px;
-      text-align: center;
-      cursor: pointer;
-      transition: 0.2s ease;
-      background: #fafafa;
-    }
-
-    .dropzone:hover,
-    .dropzone.dragover {
-      border-color: var(--accent);
-      background: #f2f4f7;
-    }
-
-    .dropzone strong {
-      display: block;
-      margin-bottom: 6px;
-      font-size: 18px;
-    }
-
-    .dropzone span {
-      color: var(--muted);
-      font-size: 14px;
-    }
-
-    input[type=&quot;file&quot;] { display: none; }
-
-    .controls {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 14px;
-      margin-top: 18px;
-    }
-
-    .field label {
-      display: block;
-      font-weight: 700;
-      margin-bottom: 7px;
-      font-size: 14px;
-    }
-
-    select,
-    input[type=&quot;text&quot;] {
-      width: 100%;
-      border: 1px solid var(--border);
-      border-radius: 10px;
-      padding: 11px 12px;
-      font-size: 15px;
-      background: #fff;
-    }
-
-    .options {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 18px;
-      margin: 18px 0;
-      color: var(--muted);
-      font-size: 14px;
-    }
-
-    .options label {
-      display: inline-flex;
-      gap: 8px;
-      align-items: center;
-      cursor: pointer;
-    }
-
-    .actions {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 10px;
-      margin-top: 18px;
-    }
-
-    button {
-      border: 0;
-      border-radius: 10px;
-      padding: 11px 16px;
-      font-size: 15px;
-      font-weight: 700;
-      cursor: pointer;
-    }
-
-    .primary {
-      background: var(--accent);
-      color: #fff;
-    }
-
-    .primary:hover { background: var(--accent-hover); }
-
-    .secondary {
-      background: #eaecf0;
-      color: var(--text);
-    }
-
-    button:disabled {
-      opacity: 0.45;
-      cursor: not-allowed;
-    }
-
-    .message {
-      display: none;
-      margin-top: 18px;
-      border-radius: 10px;
-      padding: 12px 14px;
-      font-size: 14px;
-      line-height: 1.45;
-    }
-
-    .message.success {
-      display: block;
-      background: var(--success-bg);
-      color: var(--success-text);
-    }
-
-    .message.error {
-      display: block;
-      background: var(--error-bg);
-      color: var(--error-text);
-    }
-
-    .preview {
-      display: none;
-      margin-top: 26px;
-    }
-
-    .preview-header {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      gap: 12px;
-      margin-bottom: 10px;
-    }
-
-    .preview h2 {
-      margin: 0;
-      font-size: 20px;
-    }
-
-    .summary {
-      color: var(--muted);
-      font-size: 14px;
-    }
-
-    .table-wrap {
-      overflow: auto;
-      max-height: 460px;
-      border: 1px solid var(--border);
-      border-radius: 12px;
-    }
-
-    table {
-      width: 100%;
-      border-collapse: collapse;
-      min-width: 760px;
-      background: #fff;
-    }
-
-    th,
-    td {
-      border-bottom: 1px solid #eaecf0;
-      padding: 10px 12px;
-      text-align: left;
-      font-size: 13px;
-      white-space: nowrap;
-    }
-
-    th {
-      position: sticky;
-      top: 0;
-      background: #f9fafb;
-      z-index: 1;
-    }
-
-    .footer-note {
-      margin-top: 20px;
-      color: var(--muted);
-      font-size: 13px;
-      line-height: 1.5;
-    }
-
-    @media (max-width: 700px) {
-      .controls { grid-template-columns: 1fr; }
-      .card { padding: 16px; }
-      .wrap { padding-top: 24px; }
-    }
-  &lt;/style&gt;
-&lt;/head&gt;
-&lt;body&gt;
-  &lt;main class=&quot;wrap&quot;&gt;
-    &lt;h1&gt;WKT Coordinate Converter&lt;/h1&gt;
-    &lt;p class=&quot;intro&quot;&gt;
-      Upload a CSV containing coordinates such as &lt;strong&gt;POINT (118.9 13.7)&lt;/strong&gt;.
-      The converter will create separate &lt;strong&gt;latitude&lt;/strong&gt; and &lt;strong&gt;longitude&lt;/strong&gt; columns and export a new CSV.
-    &lt;/p&gt;
-
-    &lt;section class=&quot;card&quot;&gt;
-      &lt;label class=&quot;dropzone&quot; id=&quot;dropzone&quot; for=&quot;fileInput&quot;&gt;
-        &lt;strong id=&quot;fileLabel&quot;&gt;Choose a CSV file&lt;/strong&gt;
-        &lt;span&gt;or drag and drop it here&lt;/span&gt;
-      &lt;/label&gt;
-      &lt;input id=&quot;fileInput&quot; type=&quot;file&quot; accept=&quot;.csv,text/csv&quot; /&gt;
-
-      &lt;div class=&quot;controls&quot;&gt;
-        &lt;div class=&quot;field&quot;&gt;
-          &lt;label for=&quot;wktColumn&quot;&gt;WKT column&lt;/label&gt;
-          &lt;select id=&quot;wktColumn&quot; disabled&gt;
-            &lt;option&gt;Upload a file first&lt;/option&gt;
-          &lt;/select&gt;
-        &lt;/div&gt;
-        &lt;div class=&quot;field&quot;&gt;
-          &lt;label for=&quot;outputName&quot;&gt;Output filename&lt;/label&gt;
-          &lt;input id=&quot;outputName&quot; type=&quot;text&quot; value=&quot;cleaned_map.csv&quot; /&gt;
-        &lt;/div&gt;
-      &lt;/div&gt;
-
-      &lt;div class=&quot;options&quot;&gt;
-        &lt;label&gt;&lt;input id=&quot;removeWkt&quot; type=&quot;checkbox&quot; /&gt; Remove original WKT column&lt;/label&gt;
-        &lt;label&gt;&lt;input id=&quot;latFirst&quot; type=&quot;checkbox&quot; checked /&gt; Put latitude and longitude first&lt;/label&gt;
-      &lt;/div&gt;
-
-      &lt;div class=&quot;actions&quot;&gt;
-        &lt;button id=&quot;convertBtn&quot; class=&quot;primary&quot; disabled&gt;Convert file&lt;/button&gt;
-        &lt;button id=&quot;downloadBtn&quot; class=&quot;secondary&quot; disabled&gt;Download CSV&lt;/button&gt;
-        &lt;button id=&quot;resetBtn&quot; class=&quot;secondary&quot;&gt;Reset&lt;/button&gt;
-      &lt;/div&gt;
-
-      &lt;div id=&quot;message&quot; class=&quot;message&quot;&gt;&lt;/div&gt;
-
-      &lt;section id=&quot;preview&quot; class=&quot;preview&quot;&gt;
-        &lt;div class=&quot;preview-header&quot;&gt;
-          &lt;h2&gt;Preview&lt;/h2&gt;
-          &lt;div id=&quot;summary&quot; class=&quot;summary&quot;&gt;&lt;/div&gt;
-        &lt;/div&gt;
-        &lt;div class=&quot;table-wrap&quot;&gt;
-          &lt;table id=&quot;previewTable&quot;&gt;&lt;/table&gt;
-        &lt;/div&gt;
-      &lt;/section&gt;
-
-      &lt;p class=&quot;footer-note&quot;&gt;
-        WKT point order is normally &lt;strong&gt;longitude latitude&lt;/strong&gt;. This converter exports them as separate
-        &lt;strong&gt;latitude&lt;/strong&gt; and &lt;strong&gt;longitude&lt;/strong&gt; columns. Everything runs locally in your browser.
-      &lt;/p&gt;
-    &lt;/section&gt;
-  &lt;/main&gt;
-
-  &lt;script&gt;
-    const fileInput = document.getElementById(&#x27;fileInput&#x27;);
-    const dropzone = document.getElementById(&#x27;dropzone&#x27;);
-    const fileLabel = document.getElementById(&#x27;fileLabel&#x27;);
-    const wktColumn = document.getElementById(&#x27;wktColumn&#x27;);
-    const outputName = document.getElementById(&#x27;outputName&#x27;);
-    const removeWkt = document.getElementById(&#x27;removeWkt&#x27;);
-    const latFirst = document.getElementById(&#x27;latFirst&#x27;);
-    const convertBtn = document.getElementById(&#x27;convertBtn&#x27;);
-    const downloadBtn = document.getElementById(&#x27;downloadBtn&#x27;);
-    const resetBtn = document.getElementById(&#x27;resetBtn&#x27;);
-    const message = document.getElementById(&#x27;message&#x27;);
-    const preview = document.getElementById(&#x27;preview&#x27;);
-    const previewTable = document.getElementById(&#x27;previewTable&#x27;);
-    const summary = document.getElementById(&#x27;summary&#x27;);
-
-    let sourceRows = [];
-    let headers = [];
-    let convertedRows = [];
-    let convertedHeaders = [];
-
-    function showMessage(text, type) {
-      message.textContent = text;
-      message.className = `message ${type}`;
-    }
-
-    function clearMessage() {
-      message.textContent = &#x27;&#x27;;
-      message.className = &#x27;message&#x27;;
-    }
-
-    function parseCSV(text) {
-      const rows = [];
-      let row = [];
-      let field = &#x27;&#x27;;
-      let inQuotes = false;
-
-      for (let i = 0; i &lt; text.length; i++) {
-        const char = text[i];
-        const next = text[i + 1];
-
-        if (char === &#x27;&quot;&#x27; &amp;&amp; inQuotes &amp;&amp; next === &#x27;&quot;&#x27;) {
-          field += &#x27;&quot;&#x27;;
-          i++;
-        } else if (char === &#x27;&quot;&#x27;) {
-          inQuotes = !inQuotes;
-        } else if (char === &#x27;,&#x27; &amp;&amp; !inQuotes) {
-          row.push(field);
-          field = &#x27;&#x27;;
-        } else if ((char === &#x27;\n&#x27; || char === &#x27;\r&#x27;) &amp;&amp; !inQuotes) {
-          if (char === &#x27;\r&#x27; &amp;&amp; next === &#x27;\n&#x27;) i++;
-          row.push(field);
-          if (row.some(value =&gt; value !== &#x27;&#x27;)) rows.push(row);
-          row = [];
-          field = &#x27;&#x27;;
-        } else {
-          field += char;
-        }
-      }
-
-      row.push(field);
-      if (row.some(value =&gt; value !== &#x27;&#x27;)) rows.push(row);
-      return rows;
-    }
-
-    function escapeCSV(value) {
-      const text = value == null ? &#x27;&#x27; : String(value);
-      if (/[&quot;,\n\r]/.test(text)) return `&quot;${text.replace(/&quot;/g, &#x27;&quot;&quot;&#x27;)}&quot;`;
-      return text;
-    }
-
-    function findSuggestedColumn() {
-      const preferred = headers.findIndex(h =&gt; /^wkt$/i.test(h.trim()));
-      if (preferred &gt;= 0) return preferred;
-
-      for (let c = 0; c &lt; headers.length; c++) {
-        const hasPoint = sourceRows.slice(0, 30).some(row =&gt; /POINT\s*\(/i.test(row[c] || &#x27;&#x27;));
-        if (hasPoint) return c;
-      }
-      return 0;
-    }
-
-    function populateColumnSelect() {
-      wktColumn.innerHTML = &#x27;&#x27;;
-      headers.forEach((header, index) =&gt; {
-        const option = document.createElement(&#x27;option&#x27;);
-        option.value = index;
-        option.textContent = header || `Column ${index + 1}`;
-        wktColumn.appendChild(option);
-      });
-      wktColumn.value = findSuggestedColumn();
-      wktColumn.disabled = false;
-    }
-
-    function loadFile(file) {
-      clearMessage();
-      if (!file || !file.name.toLowerCase().endsWith(&#x27;.csv&#x27;)) {
-        showMessage(&#x27;Please choose a CSV file.&#x27;, &#x27;error&#x27;);
-        return;
-      }
-
-      const reader = new FileReader();
-      reader.onload = event =&gt; {
-        try {
-          const parsed = parseCSV(event.target.result.replace(/^\uFEFF/, &#x27;&#x27;));
-          if (parsed.length &lt; 2) throw new Error(&#x27;The CSV does not contain any data rows.&#x27;);
-
-          headers = parsed[0];
-          sourceRows = parsed.slice(1).map(row =&gt; {
-            const copy = [...row];
-            while (copy.length &lt; headers.length) copy.push(&#x27;&#x27;);
-            return copy;
-          });
-
-          populateColumnSelect();
-          fileLabel.textContent = file.name;
-          outputName.value = file.name.replace(/\.csv$/i, &#x27;&#x27;) + &#x27;_cleaned.csv&#x27;;
-          convertBtn.disabled = false;
-          downloadBtn.disabled = true;
-          preview.style.display = &#x27;none&#x27;;
-          showMessage(`Loaded ${sourceRows.length.toLocaleString()} rows. Choose the WKT column, then convert.`, &#x27;success&#x27;);
-        } catch (error) {
-          showMessage(error.message || &#x27;The file could not be read.&#x27;, &#x27;error&#x27;);
-        }
-      };
-      reader.readAsText(file);
-    }
-
-    function parsePoint(value) {
-      const match = String(value || &#x27;&#x27;).trim().match(/^POINT(?:\s+Z|\s+M|\s+ZM)?\s*\(\s*([-+]?\d*\.?\d+(?:[eE][-+]?\d+)?)\s+([-+]?\d*\.?\d+(?:[eE][-+]?\d+)?)(?:\s+[-+]?\d*\.?\d+(?:[eE][-+]?\d+)?)?\s*\)$/i);
-      if (!match) return null;
-      return { longitude: Number(match[1]), latitude: Number(match[2]) };
-    }
-
-    function convert() {
-      clearMessage();
-      const columnIndex = Number(wktColumn.value);
-      let valid = 0;
-      let invalid = 0;
-
-      const baseHeaders = headers.filter((_, index) =&gt; !(removeWkt.checked &amp;&amp; index === columnIndex));
-      convertedHeaders = latFirst.checked
-        ? [&#x27;latitude&#x27;, &#x27;longitude&#x27;, ...baseHeaders]
-        : [...baseHeaders, &#x27;latitude&#x27;, &#x27;longitude&#x27;];
-
-      convertedRows = sourceRows.map(row =&gt; {
-        const point = parsePoint(row[columnIndex]);
-        if (point) valid++; else invalid++;
-
-        const baseRow = row.filter((_, index) =&gt; !(removeWkt.checked &amp;&amp; index === columnIndex));
-        const latitude = point ? point.latitude : &#x27;&#x27;;
-        const longitude = point ? point.longitude : &#x27;&#x27;;
-
-        return latFirst.checked
-          ? [latitude, longitude, ...baseRow]
-          : [...baseRow, latitude, longitude];
-      });
-
-      renderPreview();
-      downloadBtn.disabled = false;
-      preview.style.display = &#x27;block&#x27;;
-
-      if (invalid === 0) {
-        showMessage(`Converted all ${valid.toLocaleString()} rows successfully.`, &#x27;success&#x27;);
-      } else {
-        showMessage(`Converted ${valid.toLocaleString()} rows. ${invalid.toLocaleString()} rows did not contain a valid WKT POINT and were left blank.`, &#x27;error&#x27;);
-      }
-    }
-
-    function renderPreview() {
-      const maxRows = 100;
-      previewTable.innerHTML = &#x27;&#x27;;
-
-      const thead = document.createElement(&#x27;thead&#x27;);
-      const headerRow = document.createElement(&#x27;tr&#x27;);
-      convertedHeaders.forEach(header =&gt; {
-        const th = document.createElement(&#x27;th&#x27;);
-        th.textContent = header;
-        headerRow.appendChild(th);
-      });
-      thead.appendChild(headerRow);
-      previewTable.appendChild(thead);
-
-      const tbody = document.createElement(&#x27;tbody&#x27;);
-      convertedRows.slice(0, maxRows).forEach(row =&gt; {
-        const tr = document.createElement(&#x27;tr&#x27;);
-        row.forEach(value =&gt; {
-          const td = document.createElement(&#x27;td&#x27;);
-          td.textContent = value;
-          tr.appendChild(td);
-        });
-        tbody.appendChild(tr);
-      });
-      previewTable.appendChild(tbody);
-
-      summary.textContent = convertedRows.length &gt; maxRows
-        ? `Showing first ${maxRows} of ${convertedRows.length.toLocaleString()} rows`
-        : `${convertedRows.length.toLocaleString()} rows`;
-    }
-
-    function downloadCSV() {
-      const lines = [convertedHeaders, ...convertedRows]
-        .map(row =&gt; row.map(escapeCSV).join(&#x27;,&#x27;))
-        .join(&#x27;\r\n&#x27;);
-
-      const blob = new Blob([&#x27;\uFEFF&#x27; + lines], { type: &#x27;text/csv;charset=utf-8&#x27; });
-      const url = URL.createObjectURL(blob);
-      const link = document.createElement(&#x27;a&#x27;);
-      link.href = url;
-      link.download = outputName.value.trim() || &#x27;cleaned_map.csv&#x27;;
-      document.body.appendChild(link);
-      link.click();
-      link.remove();
-      URL.revokeObjectURL(url);
-    }
-
-    function reset() {
-      fileInput.value = &#x27;&#x27;;
-      fileLabel.textContent = &#x27;Choose a CSV file&#x27;;
-      wktColumn.innerHTML = &#x27;&lt;option&gt;Upload a file first&lt;/option&gt;&#x27;;
-      wktColumn.disabled = true;
-      outputName.value = &#x27;cleaned_map.csv&#x27;;
-      removeWkt.checked = false;
-      latFirst.checked = true;
-      convertBtn.disabled = true;
-      downloadBtn.disabled = true;
-      preview.style.display = &#x27;none&#x27;;
-      previewTable.innerHTML = &#x27;&#x27;;
-      clearMessage();
-      sourceRows = [];
-      headers = [];
-      convertedRows = [];
-      convertedHeaders = [];
-    }
-
-    fileInput.addEventListener(&#x27;change&#x27;, event =&gt; loadFile(event.target.files[0]));
-    convertBtn.addEventListener(&#x27;click&#x27;, convert);
-    downloadBtn.addEventListener(&#x27;click&#x27;, downloadCSV);
-    resetBtn.addEventListener(&#x27;click&#x27;, reset);
-
-    [&#x27;dragenter&#x27;, &#x27;dragover&#x27;].forEach(eventName =&gt; {
-      dropzone.addEventListener(eventName, event =&gt; {
-        event.preventDefault();
-        dropzone.classList.add(&#x27;dragover&#x27;);
-      });
-    });
-
-    [&#x27;dragleave&#x27;, &#x27;drop&#x27;].forEach(eventName =&gt; {
-      dropzone.addEventListener(eventName, event =&gt; {
-        event.preventDefault();
-        dropzone.classList.remove(&#x27;dragover&#x27;);
-      });
-    });
-
-    dropzone.addEventListener(&#x27;drop&#x27;, event =&gt; {
-      const file = event.dataTransfer.files[0];
-      loadFile(file);
-    });
-  &lt;/script&gt;
-&lt;/body&gt;
-&lt;/html&gt;
-'></iframe>
-<script>
-function show(i,b){
-document.querySelectorAll('iframe').forEach((f,n)=>f.classList.toggle('active',n===i));
-document.querySelectorAll('button').forEach(x=>x.classList.remove('active'));
-b.classList.add('active');
-}
-</script>
-</body></html>
+  <div class="app-shell">
+    <aside class="sidebar" id="sidebar">
+      <div class="brand">
+        <div class="brand-mark" aria-hidden="true">FM</div>
+        <div>
+          <h1>Flourish Map Toolkit</h1>
+          <p>Map-production utilities</p>
+        </div>
+      </div>
+
+      <nav class="tool-nav" aria-label="Toolkit navigation">
+        <button class="nav-item active" data-tool="earthquake" type="button">
+          <span class="nav-icon" aria-hidden="true">◎</span>
+          <span>
+            <strong>Earthquake Heatmap</strong>
+            <small>USGS contours to regions</small>
+          </span>
+        </button>
+        <button class="nav-item" data-tool="coordinates" type="button">
+          <span class="nav-icon" aria-hidden="true">⌖</span>
+          <span>
+            <strong>Coordinates Converter</strong>
+            <small>WKT to latitude/longitude</small>
+          </span>
+        </button>
+      </nav>
+
+      <div class="sidebar-footer">
+        <span class="status-dot"></span>
+        <span>Runs locally in your browser</span>
+      </div>
+    </aside>
+
+    <main class="main-content">
+      <header class="topbar">
+        <button id="menuButton" class="menu-button" type="button" aria-label="Open navigation">☰</button>
+        <div>
+          <p class="eyebrow">Flourish Map Toolkit</p>
+          <h2 id="pageTitle">Earthquake Heatmap Converter</h2>
+        </div>
+        <div class="version-badge">Version 2</div>
+      </header>
+
+      <section id="earthquakeTool" class="tool-panel active" aria-labelledby="pageTitle">
+        <div class="intro-card">
+          <p>Convert a USGS <code>cont_mmi.json</code> file into five intensity-band rows for the FT WebGL Map <strong>Regions</strong> sheet.</p>
+        </div>
+
+        <section class="content-card">
+          <div id="eqDropzone" class="dropzone" tabindex="0" role="button" aria-label="Upload earthquake contour file">
+            <input id="eqFileInput" type="file" accept=".json,.geojson,application/json">
+            <div class="upload-icon" aria-hidden="true">⇧</div>
+            <strong>Drop <code>cont_mmi.json</code> here</strong>
+            <span>or choose a JSON / GeoJSON file</span>
+          </div>
+        </section>
+
+        <section class="content-card">
+          <div class="section-heading">
+            <div>
+              <p class="eyebrow">Appearance</p>
+              <h3>Band settings</h3>
+            </div>
+            <p>Grouped from lower to higher shaking intensity.</p>
+          </div>
+
+          <div class="band-grid">
+            <div class="band-item"><span style="--swatch:#f8de8b"></span><strong>3–4</strong><small>Intensity 1</small></div>
+            <div class="band-item"><span style="--swatch:#f8ae4c"></span><strong>4.5–5.5</strong><small>Intensity 2</small></div>
+            <div class="band-item"><span style="--swatch:#f96a2c"></span><strong>6–7</strong><small>Intensity 3</small></div>
+            <div class="band-item"><span style="--swatch:#e83b26"></span><strong>7.5–8</strong><small>Intensity 4</small></div>
+            <div class="band-item"><span style="--swatch:#c7221f"></span><strong>8.5+</strong><small>Intensity 5</small></div>
+          </div>
+
+          <div class="form-grid three-columns">
+            <label class="field">
+              <span>Base opacity</span>
+              <input id="eqOpacity" type="number" min="0" max="1" step="0.05" value="0.62">
+            </label>
+            <label class="field">
+              <span>Stroke colour</span>
+              <input id="eqStroke" type="text" placeholder="#000000">
+            </label>
+            <label class="field">
+              <span>Stroke width</span>
+              <input id="eqStrokeWidth" type="number" min="0" step="0.1" value="0">
+            </label>
+          </div>
+        </section>
+
+        <section class="content-card action-card">
+          <div>
+            <p class="eyebrow">Export</p>
+            <h3>Download converted files</h3>
+            <p id="eqStatus" class="status-message" aria-live="polite">Waiting for a file.</p>
+          </div>
+          <div class="button-row">
+            <button id="eqDownloadCsv" class="button primary" type="button" disabled>Download CSV</button>
+            <button id="eqDownloadGeo" class="button secondary" type="button" disabled>Download GeoJSON</button>
+          </div>
+        </section>
+      </section>
+
+      <section id="coordinatesTool" class="tool-panel" aria-labelledby="pageTitle">
+        <div class="intro-card">
+          <p>Upload a CSV containing WKT coordinates such as <code>POINT (118.9 13.7)</code>. The converter separates them into <strong>latitude</strong> and <strong>longitude</strong> columns.</p>
+        </div>
+
+        <section class="content-card">
+          <div id="coordDropzone" class="dropzone" tabindex="0" role="button" aria-label="Upload coordinates CSV">
+            <input id="coordFileInput" type="file" accept=".csv,text/csv">
+            <div class="upload-icon" aria-hidden="true">⇧</div>
+            <strong id="coordFileLabel">Drop a CSV file here</strong>
+            <span>or choose a CSV from your computer</span>
+          </div>
+        </section>
+
+        <section class="content-card">
+          <div class="section-heading">
+            <div>
+              <p class="eyebrow">Settings</p>
+              <h3>Coordinate output</h3>
+            </div>
+          </div>
+
+          <div class="form-grid two-columns">
+            <label class="field">
+              <span>WKT column</span>
+              <select id="coordWktColumn" disabled><option>Upload a file first</option></select>
+            </label>
+            <label class="field">
+              <span>Output filename</span>
+              <input id="coordOutputName" type="text" value="flourish_coordinates.csv">
+            </label>
+          </div>
+
+          <div class="check-row">
+            <label><input id="coordRemoveWkt" type="checkbox"> Remove the original WKT column</label>
+            <label><input id="coordLatFirst" type="checkbox" checked> Put latitude and longitude first</label>
+          </div>
+
+          <div class="button-row left">
+            <button id="coordConvert" class="button primary" type="button" disabled>Convert file</button>
+            <button id="coordDownload" class="button secondary" type="button" disabled>Download CSV</button>
+            <button id="coordReset" class="button ghost" type="button">Reset</button>
+          </div>
+
+          <p id="coordMessage" class="status-message" aria-live="polite">Waiting for a file.</p>
+        </section>
+
+        <section id="coordPreview" class="content-card preview-card" hidden>
+          <div class="section-heading compact">
+            <div>
+              <p class="eyebrow">Preview</p>
+              <h3>Converted data</h3>
+            </div>
+            <p id="coordSummary"></p>
+          </div>
+          <div class="table-wrap">
+            <table id="coordPreviewTable"></table>
+          </div>
+        </section>
+      </section>
+    </main>
+  </div>
+
+  <div id="mobileOverlay" class="mobile-overlay"></div>
+  <script src="tools/earthquake.js"></script>
+  <script src="tools/coordinates.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>

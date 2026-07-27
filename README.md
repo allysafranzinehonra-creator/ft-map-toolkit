@@ -1,88 +1,39 @@
-# 🗺️ Flourish Map Toolkit
+# Flourish Map Toolkit — Version 2
 
-A collection of lightweight, browser-based utilities designed to speed
-up common workflows when preparing data for **Flourish** maps.
+A browser-based toolkit for preparing data for Flourish maps.
 
-![HTML](https://img.shields.io/badge/HTML-5-E34F26?logo=html5&logoColor=white)
-![JavaScript](https://img.shields.io/badge/JavaScript-ES6-F7DF1E?logo=javascript&logoColor=black)
-![Offline](https://img.shields.io/badge/Works-Offline-success)
-![License](https://img.shields.io/badge/License-Personal-blue)
+## Included tools
 
-------------------------------------------------------------------------
+### Earthquake Heatmap Converter
 
-## ✨ Features
+Converts USGS `cont_mmi.json` contour files into:
 
--   ✅ Runs entirely in your browser
--   ✅ No installation required
--   ✅ No data uploaded to external servers
--   ✅ Designed for Flourish mapping workflows
--   ✅ One-click CSV exports
+- `flourish_regions.csv`
+- `banded_regions.geojson`
 
-------------------------------------------------------------------------
+The output is designed for the FT WebGL Map **Regions** sheet.
 
-## 🛠️ Included Tools
+### Flourish Coordinates Converter
 
-### 🌍 Earthquake Heatmap Converter
+Converts WKT point values such as:
 
-Convert USGS `cont_mmi.json` files into the **FT WebGL Map -- Regions**
-format.
+```text
+POINT (118.9 13.7)
+```
 
-**Features** - Converts MMI contour polygons into FT WebGL regions -
-Groups contours into five intensity bands - Exports: -
-`flourish_regions.csv` - `banded_regions.geojson`
+into separate `latitude` and `longitude` columns and exports a clean CSV.
 
-------------------------------------------------------------------------
+## Project structure
 
-### 📍 Flourish Coordinates Converter
+```text
+index.html
+style.css
+app.js
+tools/
+  earthquake.js
+  coordinates.js
+assets/
+README.md
+```
 
-Convert WKT coordinates (e.g. `POINT (118.9 13.7)`) into separate
-latitude and longitude columns.
-
-**Features** - Automatically detects the WKT column - Splits latitude
-and longitude - Optional removal of the original WKT column - Preview
-before download - Exports a Flourish-ready CSV
-
-------------------------------------------------------------------------
-
-## 🚀 Planned Tools
-
--   GeoJSON Cleaner
--   KMZ/KML → GeoJSON Converter
--   GPX → GeoJSON Converter
--   Location Finder
--   Map Bounds Calculator
-
-------------------------------------------------------------------------
-
-## 📸 Screenshots
-
-> Add screenshots here as the toolkit grows.
-
-    Earthquake Heatmap Converter
-    ┌─────────────────────────────────────────────┐
-    │ Upload cont_mmi.json                        │
-    │ Configure bands                             │
-    │ Download Flourish CSV / GeoJSON             │
-    └─────────────────────────────────────────────┘
-
-    Flourish Coordinates Converter
-    ┌─────────────────────────────────────────────┐
-    │ Upload CSV                                 │
-    │ Split WKT → Latitude / Longitude           │
-    │ Preview                                    │
-    │ Download CSV                               │
-    └─────────────────────────────────────────────┘
-
-------------------------------------------------------------------------
-
-## 💻 Technology
-
--   HTML5
--   CSS3
--   Vanilla JavaScript
-
-------------------------------------------------------------------------
-
-## 📄 License
-
-Personal project for map production workflows.
+Everything runs locally in the browser. No installation or external processing is required.
