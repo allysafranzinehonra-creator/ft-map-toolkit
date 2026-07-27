@@ -1,0 +1,315 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>FT Map Toolkit</title>
+  <style>
+    :root {
+      --paper: #fff1e5;
+      --card: #ffffff;
+      --ink: #262a33;
+      --muted: #667085;
+      --border: #d7cec7;
+      --blue: #0f5499;
+      --blue-hover: #0b3f73;
+      --soft: #f8f5f2;
+      --success-bg: #ecfdf3;
+      --success-text: #027a48;
+      --error-bg: #fef3f2;
+      --error-text: #b42318;
+      font-family: Arial, Helvetica, sans-serif;
+    }
+    * { box-sizing: border-box; }
+    body { margin: 0; background: var(--paper); color: var(--ink); }
+    .shell { max-width: 1120px; margin: 0 auto; padding: 28px 20px 56px; }
+    .masthead { margin-bottom: 22px; }
+    .eyebrow { color: var(--blue); font-weight: 700; letter-spacing: .08em; text-transform: uppercase; font-size: 12px; }
+    h1 { margin: 6px 0 8px; font-size: clamp(30px, 5vw, 46px); line-height: 1.05; }
+    .intro { margin: 0; color: var(--muted); max-width: 780px; line-height: 1.55; }
+    .tabs { display: flex; gap: 8px; margin: 22px 0 18px; flex-wrap: wrap; }
+    .tab { border: 1px solid var(--border); background: rgba(255,255,255,.62); color: var(--ink); border-radius: 999px; padding: 11px 16px; font-weight: 700; cursor: pointer; }
+    .tab.active { background: var(--blue); color: #fff; border-color: var(--blue); }
+    .panel { display: none; }
+    .panel.active { display: block; }
+    .card { background: var(--card); border: 1px solid var(--border); border-radius: 14px; padding: 20px; margin: 14px 0; box-shadow: 0 7px 18px rgba(38,42,51,.05); }
+    h2 { margin: 0 0 8px; font-size: 22px; }
+    .small { color: var(--muted); font-size: 13px; line-height: 1.5; }
+    .dropzone { border: 2px dashed #9c948e; border-radius: 12px; padding: 34px 20px; text-align: center; background: #fafafa; cursor: pointer; transition: .18s ease; }
+    .dropzone.drag, .dropzone.dragover, .dropzone:hover { border-color: var(--blue); background: #f3f7fb; }
+    .dropzone strong { display: block; margin-bottom: 5px; font-size: 17px; }
+    .hidden-file { display: none; }
+    .grid-five { display: grid; grid-template-columns: repeat(5, 1fr); gap: 8px; margin-top: 12px; }
+    .swatch { height: 29px; border-radius: 4px; border: 1px solid rgba(0,0,0,.14); }
+    .controls { display: grid; grid-template-columns: repeat(3, minmax(0,1fr)); gap: 14px; margin-top: 18px; }
+    .controls.two { grid-template-columns: repeat(2, minmax(0,1fr)); }
+    label.field-label { display: block; font-weight: 700; margin-bottom: 6px; font-size: 14px; }
+    input[type="text"], input[type="number"], select { width: 100%; padding: 10px 11px; border: 1px solid #b8b3af; border-radius: 8px; background: #fff; font-size: 14px; }
+    .options { display: flex; flex-wrap: wrap; gap: 18px; margin: 18px 0 4px; color: var(--muted); font-size: 14px; }
+    .options label { display: inline-flex; align-items: center; gap: 8px; cursor: pointer; }
+    .actions { display: flex; gap: 10px; flex-wrap: wrap; margin-top: 18px; }
+    button.action { border: 0; border-radius: 8px; padding: 11px 15px; font-weight: 700; cursor: pointer; background: var(--blue); color: #fff; }
+    button.action:hover { background: var(--blue-hover); }
+    button.secondary { background: #e8e6e4; color: var(--ink); }
+    button.secondary:hover { background: #d9d6d3; }
+    button:disabled { opacity: .42; cursor: not-allowed; }
+    .status { white-space: pre-wrap; font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 13px; margin-top: 14px; }
+    .message { display: none; margin-top: 16px; border-radius: 9px; padding: 12px 14px; font-size: 14px; line-height: 1.45; }
+    .message.success { display: block; background: var(--success-bg); color: var(--success-text); }
+    .message.error { display: block; background: var(--error-bg); color: var(--error-text); }
+    .preview { display: none; margin-top: 24px; }
+    .preview-head { display: flex; justify-content: space-between; gap: 12px; align-items: center; margin-bottom: 10px; }
+    .table-wrap { overflow: auto; max-height: 430px; border: 1px solid var(--border); border-radius: 10px; }
+    table { width: 100%; min-width: 760px; border-collapse: collapse; background: #fff; }
+    th, td { padding: 9px 11px; border-bottom: 1px solid #ebe7e3; text-align: left; white-space: nowrap; font-size: 13px; }
+    th { position: sticky; top: 0; background: #f9f7f5; z-index: 1; }
+    code { background: #f4f4f4; padding: 2px 5px; border-radius: 3px; }
+    .tool-note { padding: 14px 16px; border-left: 4px solid var(--blue); background: rgba(255,255,255,.55); border-radius: 0 8px 8px 0; }
+    @media (max-width: 760px) {
+      .controls, .controls.two, .grid-five { grid-template-columns: 1fr; }
+      .shell { padding-top: 20px; }
+      .card { padding: 16px; }
+    }
+  </style>
+</head>
+<body>
+  <main class="shell">
+    <header class="masthead">
+      <div class="eyebrow">FT Map Toolkit</div>
+      <h1>Map conversion tools</h1>
+      <p class="intro">Prepare earthquake contour regions and point coordinates for Flourish without installing software. Everything runs locally in your browser.</p>
+    </header>
+
+    <nav class="tabs" aria-label="Converter tabs">
+      <button class="tab active" data-tab="earthquake">Earthquake Heatmap Converter</button>
+      <button class="tab" data-tab="coordinates">Flourish Coordinates Converter</button>
+    </nav>
+
+    <section id="earthquake" class="panel active">
+      <div class="tool-note small">Convert a USGS <code>cont_mmi.json</code> file into five intensity-band rows for the FT WebGL Map <strong>Regions</strong> sheet.</div>
+
+      <div class="card">
+        <label class="dropzone" id="eqDrop" for="eqFile">
+          <strong>Drop cont_mmi.json here</strong>
+          <span class="small">or choose a JSON / GeoJSON file</span>
+        </label>
+        <input id="eqFile" class="hidden-file" type="file" accept=".json,.geojson,application/json" />
+      </div>
+
+      <div class="card">
+        <h2>Band settings</h2>
+        <p class="small">Grouped into a simple FT-style legend from less to more intense shaking.</p>
+        <div class="grid-five">
+          <div><div class="swatch" style="background:#f8de8b"></div><div class="small">3–4</div></div>
+          <div><div class="swatch" style="background:#f8ae4c"></div><div class="small">4.5–5.5</div></div>
+          <div><div class="swatch" style="background:#f96a2c"></div><div class="small">6–7</div></div>
+          <div><div class="swatch" style="background:#e83b26"></div><div class="small">7.5–8</div></div>
+          <div><div class="swatch" style="background:#c7221f"></div><div class="small">8.5+</div></div>
+        </div>
+        <div class="controls">
+          <div><label class="field-label" for="eqOpacity">Base opacity</label><input id="eqOpacity" type="number" min="0" max="1" step="0.05" value="0.62"></div>
+          <div><label class="field-label" for="eqStroke">Stroke colour</label><input id="eqStroke" type="text" value=""></div>
+          <div><label class="field-label" for="eqStrokeWidth">Stroke width</label><input id="eqStrokeWidth" type="number" min="0" step="0.1" value="0"></div>
+        </div>
+        <div class="actions">
+          <button id="eqDownloadCsv" class="action" disabled>Download flourish_regions.csv</button>
+          <button id="eqDownloadGeo" class="action secondary" disabled>Download banded_regions.geojson</button>
+        </div>
+        <p id="eqStatus" class="status">Waiting for file...</p>
+      </div>
+
+      <div class="card small">
+        <h2>How to use in Flourish</h2>
+        <p>Open the FT WebGL Map → Data → <strong>Regions</strong>. Delete the sample region rows, then import or paste the CSV. Each <code>region_geometry</code> cell contains a GeoJSON FeatureCollection.</p>
+      </div>
+    </section>
+
+    <section id="coordinates" class="panel">
+      <div class="tool-note small">Upload a CSV containing WKT coordinates such as <code>POINT (118.9 13.7)</code>. The converter exports separate <strong>latitude</strong> and <strong>longitude</strong> columns for Flourish.</div>
+
+      <div class="card">
+        <label class="dropzone" id="coordDrop" for="coordFile">
+          <strong id="coordFileLabel">Choose a CSV file</strong>
+          <span class="small">or drag and drop it here</span>
+        </label>
+        <input id="coordFile" class="hidden-file" type="file" accept=".csv,text/csv" />
+
+        <div class="controls two">
+          <div><label class="field-label" for="coordWktColumn">WKT column</label><select id="coordWktColumn" disabled><option>Upload a file first</option></select></div>
+          <div><label class="field-label" for="coordOutputName">Output filename</label><input id="coordOutputName" type="text" value="flourish_coordinates.csv"></div>
+        </div>
+
+        <div class="options">
+          <label><input id="coordRemoveWkt" type="checkbox"> Remove original WKT column</label>
+          <label><input id="coordLatFirst" type="checkbox" checked> Put latitude and longitude first</label>
+        </div>
+
+        <div class="actions">
+          <button id="coordConvert" class="action" disabled>Convert file</button>
+          <button id="coordDownload" class="action secondary" disabled>Download CSV</button>
+          <button id="coordReset" class="action secondary">Reset</button>
+        </div>
+
+        <div id="coordMessage" class="message"></div>
+
+        <section id="coordPreview" class="preview">
+          <div class="preview-head"><h2>Preview</h2><div id="coordSummary" class="small"></div></div>
+          <div class="table-wrap"><table id="coordPreviewTable"></table></div>
+        </section>
+      </div>
+    </section>
+  </main>
+
+<script>
+  // Tabs
+  document.querySelectorAll('.tab').forEach(btn => btn.addEventListener('click', () => {
+    document.querySelectorAll('.tab').forEach(b => b.classList.toggle('active', b === btn));
+    document.querySelectorAll('.panel').forEach(p => p.classList.toggle('active', p.id === btn.dataset.tab));
+  }));
+
+  // Earthquake converter
+  const eqBands = [
+    {label:'shake-intensity-1', min:3, max:4, color:'#f8de8b'},
+    {label:'shake-intensity-2', min:4.5, max:5.5, color:'#f8ae4c'},
+    {label:'shake-intensity-3', min:6, max:7, color:'#f96a2c'},
+    {label:'shake-intensity-4', min:7.5, max:8, color:'#e83b26'},
+    {label:'shake-intensity-5', min:8.5, max:99, color:'#c7221f'}
+  ];
+  let eqCsvBlob = null, eqGeoBlob = null;
+  const eq = id => document.getElementById(id);
+  function eqCloseRing(ring){
+    if(!ring || ring.length < 3) return null;
+    const out = ring.map(p => [Number(p[0]), Number(p[1])]).filter(p => Number.isFinite(p[0]) && Number.isFinite(p[1]));
+    if(out.length < 3) return null;
+    const a = out[0], b = out[out.length-1];
+    if(Math.abs(a[0]-b[0]) > 1e-6 || Math.abs(a[1]-b[1]) > 1e-6) out.push([a[0], a[1]]);
+    return out.length >= 4 ? out : null;
+  }
+  function eqSignedArea(ring){ let sum=0; for(let i=0;i<ring.length-1;i++) sum += ring[i][0]*ring[i+1][1]-ring[i+1][0]*ring[i][1]; return sum/2; }
+  function eqNormaliseRing(ring){ return eqSignedArea(ring) < 0 ? ring.slice().reverse() : ring; }
+  function eqBandFor(v){ return eqBands.find(b => v >= b.min && v <= b.max); }
+  function eqFeatureToPolygons(feature){
+    const geom = feature.geometry || {};
+    const value = Number(feature.properties && feature.properties.value);
+    const band = eqBandFor(value); if(!band) return [];
+    let rings=[];
+    if(geom.type==='LineString') rings=[geom.coordinates];
+    if(geom.type==='MultiLineString') rings=geom.coordinates || [];
+    if(geom.type==='Polygon') rings=(geom.coordinates || []).slice(0,1);
+    if(geom.type==='MultiPolygon') rings=(geom.coordinates || []).map(poly => poly[0]);
+    return rings.map(eqCloseRing).filter(Boolean).map(ring => ({type:'Feature',properties:{value,band:band.label,band_min:band.min,band_max:band.max},geometry:{type:'Polygon',coordinates:[eqNormaliseRing(ring)]}}));
+  }
+  function csvEscape(v){ const s=String(v==null?'':v); return /[",\n\r]/.test(s) ? '"'+s.replace(/"/g,'""')+'"' : s; }
+  function eqMakeCsv(rows){
+    const headers=['region_geometry','region_label','region_fill','region_fill_opacity','region_stroke','region_stroke_width','region_stroke_dash_array','region_stroke_linecap','region_line_opacity','region_line_blur','visible'];
+    return [headers.join(','), ...rows.map(r => headers.map(h => csvEscape(r[h] ?? '')).join(','))].join('\n');
+  }
+  async function eqHandleFile(file){
+    try{
+      const gj=JSON.parse(await file.text());
+      const polygons=(gj.features || []).flatMap(eqFeatureToPolygons);
+      const byBand=new Map(eqBands.map(b => [b.label, []]));
+      polygons.forEach(f => byBand.get(f.properties.band).push(f));
+      const baseOpacity=Number(eq('eqOpacity').value) || .62;
+      const stroke=eq('eqStroke').value.trim();
+      const strokeWidth=eq('eqStrokeWidth').value;
+      const rows=eqBands.map((b,i)=>{
+        const fc={type:'FeatureCollection',features:byBand.get(b.label)};
+        return {region_geometry:JSON.stringify(fc),region_label:b.label,region_fill:b.color,region_fill_opacity:Math.min(1, +(baseOpacity*(.68+i*.12)).toFixed(2)),region_stroke:stroke,region_stroke_width:strokeWidth || '',visible:'TRUE'};
+      }).filter(r => JSON.parse(r.region_geometry).features.length>0);
+      eqCsvBlob=new Blob([eqMakeCsv(rows)],{type:'text/csv;charset=utf-8'});
+      eqGeoBlob=new Blob([JSON.stringify({type:'FeatureCollection',features:polygons})],{type:'application/geo+json;charset=utf-8'});
+      eq('eqDownloadCsv').disabled=rows.length===0;
+      eq('eqDownloadGeo').disabled=polygons.length===0;
+      const counts=rows.map(r => `${r.region_label}: ${JSON.parse(r.region_geometry).features.length}`).join('\n');
+      eq('eqStatus').textContent=`Converted ${polygons.length} closed contour rings into ${rows.length} FT WebGL region rows.\n\n${counts}\n\nSkipped open contour segments automatically.`;
+    }catch(err){
+      eq('eqStatus').textContent='Error: '+err.message;
+      eq('eqDownloadCsv').disabled=true; eq('eqDownloadGeo').disabled=true;
+    }
+  }
+  function downloadBlob(blob,name){ const a=document.createElement('a'); a.href=URL.createObjectURL(blob); a.download=name; document.body.appendChild(a); a.click(); a.remove(); setTimeout(()=>URL.revokeObjectURL(a.href),500); }
+  eq('eqFile').addEventListener('change', e => e.target.files[0] && eqHandleFile(e.target.files[0]));
+  eq('eqDownloadCsv').addEventListener('click', () => eqCsvBlob && downloadBlob(eqCsvBlob,'flourish_regions.csv'));
+  eq('eqDownloadGeo').addEventListener('click', () => eqGeoBlob && downloadBlob(eqGeoBlob,'banded_regions.geojson'));
+  ['dragenter','dragover'].forEach(ev => eq('eqDrop').addEventListener(ev,e=>{e.preventDefault();eq('eqDrop').classList.add('drag');}));
+  ['dragleave','drop'].forEach(ev => eq('eqDrop').addEventListener(ev,e=>{e.preventDefault();eq('eqDrop').classList.remove('drag');}));
+  eq('eqDrop').addEventListener('drop',e=>e.dataTransfer.files[0]&&eqHandleFile(e.dataTransfer.files[0]));
+
+  // Coordinates converter
+  const cf=id=>document.getElementById(id);
+  let coordRows=[], coordHeaders=[], convertedRows=[], convertedHeaders=[];
+  function coordShowMessage(text,type){ const el=cf('coordMessage'); el.textContent=text; el.className=`message ${type}`; }
+  function coordClearMessage(){ const el=cf('coordMessage'); el.textContent=''; el.className='message'; }
+  function parseCSV(text){
+    const rows=[]; let row=[], field='', inQuotes=false;
+    for(let i=0;i<text.length;i++){
+      const char=text[i], next=text[i+1];
+      if(char==='"' && inQuotes && next==='"'){ field+='"'; i++; }
+      else if(char==='"') inQuotes=!inQuotes;
+      else if(char===',' && !inQuotes){ row.push(field); field=''; }
+      else if((char==='\n'||char==='\r') && !inQuotes){ if(char==='\r'&&next==='\n') i++; row.push(field); if(row.some(v=>v!=='')) rows.push(row); row=[]; field=''; }
+      else field+=char;
+    }
+    row.push(field); if(row.some(v=>v!=='')) rows.push(row); return rows;
+  }
+  function coordSuggestedColumn(){
+    const preferred=coordHeaders.findIndex(h=>/^wkt$/i.test(h.trim())); if(preferred>=0) return preferred;
+    for(let c=0;c<coordHeaders.length;c++) if(coordRows.slice(0,30).some(r=>/POINT\s*\(/i.test(r[c]||''))) return c;
+    return 0;
+  }
+  function coordPopulateSelect(){
+    const sel=cf('coordWktColumn'); sel.innerHTML='';
+    coordHeaders.forEach((h,i)=>{ const o=document.createElement('option'); o.value=i; o.textContent=h||`Column ${i+1}`; sel.appendChild(o); });
+    sel.value=coordSuggestedColumn(); sel.disabled=false;
+  }
+  function coordLoadFile(file){
+    coordClearMessage();
+    if(!file || !file.name.toLowerCase().endsWith('.csv')) return coordShowMessage('Please choose a CSV file.','error');
+    const reader=new FileReader();
+    reader.onload=e=>{
+      try{
+        const parsed=parseCSV(e.target.result.replace(/^\uFEFF/,''));
+        if(parsed.length<2) throw new Error('The CSV does not contain any data rows.');
+        coordHeaders=parsed[0]; coordRows=parsed.slice(1).map(r=>{const c=[...r]; while(c.length<coordHeaders.length)c.push(''); return c;});
+        coordPopulateSelect(); cf('coordFileLabel').textContent=file.name; cf('coordOutputName').value=file.name.replace(/\.csv$/i,'')+'_flourish_coordinates.csv';
+        cf('coordConvert').disabled=false; cf('coordDownload').disabled=true; cf('coordPreview').style.display='none';
+        coordShowMessage(`Loaded ${coordRows.length.toLocaleString()} rows. Choose the WKT column, then convert.`,'success');
+      }catch(err){ coordShowMessage(err.message || 'The file could not be read.','error'); }
+    };
+    reader.readAsText(file);
+  }
+  function parsePoint(value){
+    const m=String(value||'').trim().match(/^POINT(?:\s+Z|\s+M|\s+ZM)?\s*\(\s*([-+]?\d*\.?\d+(?:[eE][-+]?\d+)?)\s+([-+]?\d*\.?\d+(?:[eE][-+]?\d+)?)(?:\s+[-+]?\d*\.?\d+(?:[eE][-+]?\d+)?)?\s*\)$/i);
+    return m ? {longitude:Number(m[1]),latitude:Number(m[2])} : null;
+  }
+  function coordConvert(){
+    coordClearMessage(); const idx=Number(cf('coordWktColumn').value); let valid=0, invalid=0;
+    const baseHeaders=coordHeaders.filter((_,i)=>!(cf('coordRemoveWkt').checked&&i===idx));
+    convertedHeaders=cf('coordLatFirst').checked?['latitude','longitude',...baseHeaders]:[...baseHeaders,'latitude','longitude'];
+    convertedRows=coordRows.map(r=>{ const p=parsePoint(r[idx]); p?valid++:invalid++; const base=r.filter((_,i)=>!(cf('coordRemoveWkt').checked&&i===idx)); const lat=p?p.latitude:'', lon=p?p.longitude:''; return cf('coordLatFirst').checked?[lat,lon,...base]:[...base,lat,lon]; });
+    coordRenderPreview(); cf('coordDownload').disabled=false; cf('coordPreview').style.display='block';
+    invalid===0 ? coordShowMessage(`Converted all ${valid.toLocaleString()} rows successfully.`,'success') : coordShowMessage(`Converted ${valid.toLocaleString()} rows. ${invalid.toLocaleString()} rows did not contain a valid WKT POINT and were left blank.`,'error');
+  }
+  function coordRenderPreview(){
+    const table=cf('coordPreviewTable'); table.innerHTML=''; const thead=document.createElement('thead'), hr=document.createElement('tr');
+    convertedHeaders.forEach(h=>{const th=document.createElement('th'); th.textContent=h; hr.appendChild(th);}); thead.appendChild(hr); table.appendChild(thead);
+    const tbody=document.createElement('tbody'); convertedRows.slice(0,100).forEach(r=>{const tr=document.createElement('tr'); r.forEach(v=>{const td=document.createElement('td'); td.textContent=v; tr.appendChild(td);}); tbody.appendChild(tr);}); table.appendChild(tbody);
+    cf('coordSummary').textContent=convertedRows.length>100?`Showing first 100 of ${convertedRows.length.toLocaleString()} rows`:`${convertedRows.length.toLocaleString()} rows`;
+  }
+  function coordDownload(){
+    const lines=[convertedHeaders,...convertedRows].map(r=>r.map(csvEscape).join(',')).join('\r\n');
+    downloadBlob(new Blob(['\uFEFF'+lines],{type:'text/csv;charset=utf-8'}),cf('coordOutputName').value.trim()||'flourish_coordinates.csv');
+  }
+  function coordReset(){
+    cf('coordFile').value=''; cf('coordFileLabel').textContent='Choose a CSV file'; cf('coordWktColumn').innerHTML='<option>Upload a file first</option>'; cf('coordWktColumn').disabled=true;
+    cf('coordOutputName').value='flourish_coordinates.csv'; cf('coordRemoveWkt').checked=false; cf('coordLatFirst').checked=true; cf('coordConvert').disabled=true; cf('coordDownload').disabled=true;
+    cf('coordPreview').style.display='none'; cf('coordPreviewTable').innerHTML=''; coordClearMessage(); coordRows=[]; coordHeaders=[]; convertedRows=[]; convertedHeaders=[];
+  }
+  cf('coordFile').addEventListener('change',e=>coordLoadFile(e.target.files[0])); cf('coordConvert').addEventListener('click',coordConvert); cf('coordDownload').addEventListener('click',coordDownload); cf('coordReset').addEventListener('click',coordReset);
+  ['dragenter','dragover'].forEach(ev=>cf('coordDrop').addEventListener(ev,e=>{e.preventDefault();cf('coordDrop').classList.add('dragover');}));
+  ['dragleave','drop'].forEach(ev=>cf('coordDrop').addEventListener(ev,e=>{e.preventDefault();cf('coordDrop').classList.remove('dragover');}));
+  cf('coordDrop').addEventListener('drop',e=>coordLoadFile(e.dataTransfer.files[0]));
+</script>
+</body>
+</html>
